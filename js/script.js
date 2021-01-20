@@ -11,6 +11,7 @@
   const optTitleListSelector = '.titles';
   const optArticleTagsSelector = '.post-tags .list';
   const optArticleAuthorSelector = '.post-author';
+  const optTagListSelector = '.tags.list';
   /**/
   /**/
   // First dealing with eslint. Use additional name of function in function expression.
@@ -83,6 +84,7 @@
   };
   generateTitleLinks();
   const generateTags = function generateTags() {
+    const allTags = [];
     /* find all articles */
     const articles = document.querySelectorAll(optArticleSelector);
     /* START LOOP: for every article: */
@@ -102,12 +104,20 @@
         const tagHtml = `<li><a href="#tag-${tag}">${tag}</a></li> `;
         /* add generated code to html variable */
         articleHtml += tagHtml;
+        /* add to allTag if unique */
+        if (allTags.indexOf(tagHtml) === -1) {
+          allTags.push(tagHtml);
+        }
       /* END LOOP: for each tag */
       });
       /* insert HTML of all the links into the tags wrapper */
       tagList.innerHTML = articleHtml;
     /* END LOOP: for every article: */
     });
+    /* [NEW] find list of tags in right column */
+    const tagList = document.querySelector(optTagListSelector);
+    /* [NEW] add html from allTags to tagList */
+    tagList.innerHTML = allTags.join(' ');
   };
   generateTags();
   const tagClickHandler = function tagClickHandler(event) {
