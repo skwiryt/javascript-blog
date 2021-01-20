@@ -10,6 +10,7 @@
   const optTitleSelector = '.post-title';
   const optTitleListSelector = '.titles';
   const optArticleTagsSelector = '.post-tags .list';
+  const optArticleAuthorSelector = '.post-author';
   /**/
   /**/
   // First dealing with eslint. Use additional name of function in function expression.
@@ -96,9 +97,9 @@
       /* split tags into array */
       const tagsArray = tagsString.split(' ');
       /* START LOOP: for each tag */
-      tagsArray.forEach((element) => {
+      tagsArray.forEach((tag) => {
       /* generate HTML of the link */
-        const tagHtml = `<li><a href="#tag-${element}">${element}</a></li> `;
+        const tagHtml = `<li><a href="#tag-${tag}">${tag}</a></li> `;
         /* add generated code to html variable */
         articleHtml += tagHtml;
       /* END LOOP: for each tag */
@@ -148,4 +149,30 @@
     });
   };
   addClickListenersToTags();
+  const generateAuthors = function generateAuthors() {
+    const articleElements = document.querySelectorAll(optArticleSelector);
+    articleElements.forEach((element) => {
+      const author = element.getAttribute('data-author');
+      const authorWrapper = element.querySelector(optArticleAuthorSelector);
+      authorWrapper.innerHTML = `<a href="#author">${author}</a>`;
+    });
+  };
+  generateAuthors();
+  const authorClickHandler = function authorClickHandler(event) {
+    event.preventDefault();
+    const clickedElement = this;
+    const authorLinksActive = document.querySelectorAll('a.active[href^="#author"]');
+    authorLinksActive.forEach((link) => {
+      link.classList.remove('active');
+    });
+    clickedElement.classList.add('active');
+    const author = clickedElement.textContent;
+    generateTitleLinks(`[data-author="${author}"]`);
+  };
+  const addClickListenersToAuthors = function addClickHandlersToAuthors() {
+    document.querySelectorAll('a[href^="#author"]').forEach((link) => {
+      link.addEventListener('click', authorClickHandler);
+    });
+  };
+  addClickListenersToAuthors();
 }
