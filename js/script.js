@@ -14,6 +14,7 @@
   const optTagListSelector = '.tags.list';
   const optClaudClassCount = 5;
   const optClaudClassPrefix = 'tag-size-';
+  const optAuthorsListSelector = '.authors.list';
   /**/
   /**/
   // First dealing with eslint. Use additional name of function in function expression.
@@ -194,12 +195,27 @@
   };
   addClickListenersToTags();
   const generateAuthors = function generateAuthors() {
+    const allAuthors = {};
     const articleElements = document.querySelectorAll(optArticleSelector);
     articleElements.forEach((element) => {
       const author = element.getAttribute('data-author');
       const authorWrapper = element.querySelector(optArticleAuthorSelector);
       authorWrapper.innerHTML = `<a href="#author">${author}</a>`;
+      /* add to allAuthors if unique and count */
+      if (!allAuthors[author]) {
+        allAuthors[author] = 1;
+      } else {
+        allAuthors[author] += 1;
+      }
     });
+    const authorList = document.querySelector(optAuthorsListSelector);
+    authorList.innerHTML = '';
+    let allAuthorsHtml = '';
+    Object.keys(allAuthors).forEach((author) => {
+      allAuthorsHtml += '<li><a href="#author"><span class="author-name">'
+      + `${author} (${allAuthors[author]})</span></a></li> `;
+    });
+    authorList.innerHTML = allAuthorsHtml;
   };
   generateAuthors();
   const authorClickHandler = function authorClickHandler(event) {
