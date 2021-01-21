@@ -12,6 +12,8 @@
   const optArticleTagsSelector = '.post-tags .list';
   const optArticleAuthorSelector = '.post-author';
   const optTagListSelector = '.tags.list';
+  const optClaudClassCount = 5;
+  const optClaudClassPrefix = 'tag-size-';
   /**/
   /**/
   // First dealing with eslint. Use additional name of function in function expression.
@@ -83,8 +85,26 @@
     });
   };
   generateTitleLinks();
+  const calculateTagsParams = function calculateTagsParams(tags) {
+    const min = Object.values(tags).reduce((a, c) => Math.min(a, c));
+    const max = Object.values(tags).reduce((a, c) => Math.max(a, c));
+    return { min, max };
+  };
+  const calculateTagClass = function calculateTagClass(count, params) {
+    const span = (params.max - params.min) / optClaudClassCount;
+    const triggers = [...Array(optClaudClassCount - 1)]
+      .map((e, i) => (params.min + (i + 1) * span));
+    let classNb = 1;
+    triggers.forEach((trigger) => {
+      if (count >= trigger) {
+        classNb += 1;
+      }
+    });
+    return `${optClaudClassPrefix}${classNb}`;
+  };
   const generateTags = function generateTags() {
-    const allTags = [];
+    /* [NEW] create a new variable allTags with an empty object */
+    const allTags = {};
     /* find all articles */
     const articles = document.querySelectorAll(optArticleSelector);
     /* START LOOP: for every article: */
@@ -104,9 +124,11 @@
         const tagHtml = `<li><a href="#tag-${tag}">${tag}</a></li> `;
         /* add generated code to html variable */
         articleHtml += tagHtml;
-        /* add to allTag if unique */
-        if (allTags.indexOf(tagHtml) === -1) {
-          allTags.push(tagHtml);
+        /* add to allTags if unique and count */
+        if (!allTags[tag]) {
+          allTags[tag] = 1;
+        } else {
+          allTags[tag] += 1;
         }
       /* END LOOP: for each tag */
       });
@@ -116,8 +138,20 @@
     });
     /* [NEW] find list of tags in right column */
     const tagList = document.querySelector(optTagListSelector);
-    /* [NEW] add html from allTags to tagList */
-    tagList.innerHTML = allTags.join(' ');
+    const tagsParams = calculateTagsParams(allTags);
+    /* [NEW] create variable for all links HTML code */
+    let allTagsHTML = '';
+    /* [NEW] START LOOP: for each tag in allTags: */
+    // eslint-disable-next-line no-restricted-syntax
+    for (const tag in allTags) {
+      /* [NEW] generate code of a link and add it to allTagsHTML */
+      if (Object.prototype.hasOwnProperty.call(allTags, tag)) {
+        allTagsHTML += `<li><a href="#tag-${tag}" class="${calculateTagClass(allTags[tag], tagsParams)}">`
+        + `${tag} (${allTags[tag]})</a></li> `;
+      }
+    }
+    /* [NEW] add HTML from allTagsHTML to tagList */
+    tagList.innerHTML = allTagsHTML;
   };
   generateTags();
   const tagClickHandler = function tagClickHandler(event) {
