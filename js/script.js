@@ -6,15 +6,23 @@
   /**/
   /**/
   // options
-  const optArticleSelector = '.post';
-  const optTitleSelector = '.post-title';
-  const optTitleListSelector = '.titles';
-  const optArticleTagsSelector = '.post-tags .list';
-  const optArticleAuthorSelector = '.post-author';
-  const optTagListSelector = '.tags.list';
-  const optClaudClassCount = 5;
-  const optClaudClassPrefix = 'tag-size-';
-  const optAuthorsListSelector = '.authors.list';
+  const opts = {
+    cloudClassCount: 5,
+    cloudClassPrefix: 'tag-size-',
+  };
+  const select = {
+    articles: '.post',
+    linksTo: {
+      tags: 'a[href^="#tag"]',
+      authors: 'a[href^="#author"]',
+    },
+    articleTitles: '.post-title',
+    articleAuthors: '.post-author',
+    articleTagLists: '.post-tags .list',
+    tagList: '.tags.list',
+    authorList: '.authors.list',
+    titleList: '.titles',
+  };
   /**/
   /**/
   // First dealing with eslint. Use additional name of function in function expression.
@@ -25,7 +33,7 @@
     const clickedElement = this;
 
     /* [DONE] remove class 'active' from all article links  */
-    const activeLinks = document.querySelectorAll(`${optTitleListSelector} a.active`);
+    const activeLinks = document.querySelectorAll(`${select.titleList} a.active`);
     activeLinks.forEach((activeLink) => {
       activeLink.classList.remove('active');
     });
@@ -34,7 +42,7 @@
     clickedElement.classList.add('active');
 
     /* [DONE] remove class 'active' from all articles */
-    const activeArticles = document.querySelectorAll(`${optArticleSelector}.active`);
+    const activeArticles = document.querySelectorAll(`${select.articles}.active`);
     activeArticles.forEach((activeArticle) => {
       activeArticle.classList.remove('active');
     });
@@ -51,11 +59,11 @@
   // generate links with article titles
   const generateTitleLinks = (customSelector = '') => {
     /* remove contents of titleList */
-    const titleList = document.querySelector(optTitleListSelector);
+    const titleList = document.querySelector(select.titleList);
     titleList.innerHTML = '';
 
     /* for each article */
-    const articles = document.querySelectorAll(optArticleSelector + customSelector);
+    const articles = document.querySelectorAll(select.articles + customSelector);
     /**/
     /**/
     // Second method is simply to tell eslint to take a breake
@@ -67,7 +75,7 @@
       const articleId = article.id;
 
       /* find the title element */
-      const titleElement = article.querySelector(optTitleSelector);
+      const titleElement = article.querySelector(select.articleTitles);
       /* get the title from the title element */
       const articleTitle = titleElement.textContent;
 
@@ -80,7 +88,7 @@
     }
 
     // adding listeners to generated links
-    const links = document.querySelectorAll(`${optTitleListSelector} a`);
+    const links = document.querySelectorAll(`${select.titleList} a`);
     links.forEach((link) => {
       link.addEventListener('click', titleClickHandler);
     });
@@ -92,8 +100,8 @@
     return { min, max };
   };
   const calculateTagClass = function calculateTagClass(count, params) {
-    const span = (params.max - params.min) / optClaudClassCount;
-    const triggers = [...Array(optClaudClassCount - 1)]
+    const span = (params.max - params.min) / opts.cloudClassCount;
+    const triggers = [...Array(opts.cloudClassCount - 1)]
       .map((e, i) => (params.min + (i + 1) * span));
     let classNb = 1;
     triggers.forEach((trigger) => {
@@ -101,17 +109,17 @@
         classNb += 1;
       }
     });
-    return `${optClaudClassPrefix}${classNb}`;
+    return `${opts.cloudClassPrefix}${classNb}`;
   };
   const generateTags = function generateTags() {
     /* [NEW] create a new variable allTags with an empty object */
     const allTags = {};
     /* find all articles */
-    const articles = document.querySelectorAll(optArticleSelector);
+    const articles = document.querySelectorAll(select.articles);
     /* START LOOP: for every article: */
     articles.forEach((article) => {
     /* find tags wrapper */
-      const tagList = article.querySelector(optArticleTagsSelector);
+      const tagList = article.querySelector(select.articleTagLists);
       tagList.innerHTML = '';
       /* make html variable with empty string */
       let articleHtml = '';
@@ -138,7 +146,7 @@
     /* END LOOP: for every article: */
     });
     /* [NEW] find list of tags in right column */
-    const tagList = document.querySelector(optTagListSelector);
+    const tagList = document.querySelector(select.tagList);
     const tagsParams = calculateTagsParams(allTags);
     /* [NEW] create variable for all links HTML code */
     let allTagsHTML = '';
@@ -185,7 +193,7 @@
   };
   const addClickListenersToTags = function addClickListenersToTags() {
     /* find all links to tags */
-    const links = document.querySelectorAll('a[href^="#tag"');
+    const links = document.querySelectorAll(select.linksTo.tags);
     /* START LOOP: for each link */
     links.forEach((link) => {
       /* add tagClickHandler as event listener for that link */
@@ -196,10 +204,10 @@
   addClickListenersToTags();
   const generateAuthors = function generateAuthors() {
     const allAuthors = {};
-    const articleElements = document.querySelectorAll(optArticleSelector);
+    const articleElements = document.querySelectorAll(select.articles);
     articleElements.forEach((element) => {
       const author = element.getAttribute('data-author');
-      const authorWrapper = element.querySelector(optArticleAuthorSelector);
+      const authorWrapper = element.querySelector(select.articleAuthors);
       authorWrapper.innerHTML = `<a href="#author">${author}</a>`;
       /* add to allAuthors if unique and count */
       if (!allAuthors[author]) {
@@ -208,7 +216,7 @@
         allAuthors[author] += 1;
       }
     });
-    const authorList = document.querySelector(optAuthorsListSelector);
+    const authorList = document.querySelector(select.authorList);
     authorList.innerHTML = '';
     let allAuthorsHtml = '';
     Object.keys(allAuthors).forEach((author) => {
@@ -226,11 +234,11 @@
       link.classList.remove('active');
     });
     clickedElement.classList.add('active');
-    const author = clickedElement.textContent;
+    const author = clickedElement.textContent.replace(/ \(\d+\)/g, '');
     generateTitleLinks(`[data-author="${author}"]`);
   };
   const addClickListenersToAuthors = function addClickHandlersToAuthors() {
-    document.querySelectorAll('a[href^="#author"]').forEach((link) => {
+    document.querySelectorAll(select.linksTo.authors).forEach((link) => {
       link.addEventListener('click', authorClickHandler);
     });
   };
